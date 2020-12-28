@@ -21,6 +21,8 @@ from zipline.utils.numpy_utils import (
 )
 from zipline.utils.pandas_utils import empty_dataframe
 from zipline.utils.sqlite_utils import group_into_chunks, coerce_string_to_conn
+import pyximport
+pyximport.install()
 from ._adjustments import load_adjustments_from_sqlite
 
 log = Logger(__name__)
