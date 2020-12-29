@@ -263,11 +263,11 @@ def load_extensions(default, extensions, strict, environ, reload=False):
         Reload any extensions that have already been loaded.
     """
     if default:
-        default_extension_path = pth.default_extension(environ=environ)
-        pth.ensure_file(default_extension_path)
+        default_extension_path = pth.default_extension(environ=environ)  # 获取默认 extention 文件
+        pth.ensure_file(default_extension_path)  # 若不存在, 就创建一个新的 extension 文件
         # put the default extension first so other extensions can depend on
         # the order they are loaded
-        extensions = concatv([default_extension_path], extensions)
+        extensions = concatv([default_extension_path], extensions)  # 合并多个 extension, 并且默认的 extension 为第一个
 
     for ext in extensions:
         if ext in _loaded_extensions and not reload:
@@ -295,22 +295,26 @@ def load_extensions(default, extensions, strict, environ, reload=False):
 
 def run_algorithm(start,
                   end,
-                  initialize,
-                  capital_base,
-                  handle_data=None,
-                  before_trading_start=None,
-                  analyze=None,
-                  data_frequency='daily',
-                  bundle='quantopian-quandl',
-                  bundle_timestamp=None,
-                  trading_calendar=None,
-                  metrics_set='default',
-                  benchmark_returns=None,
-                  default_extension=True,
-                  extensions=(),
-                  strict_extensions=True,
-                  environ=os.environ,
-                  blotter='default'):
+                  initialize,  # 策略的函数: 回测之前运行
+                  capital_base,  # 初始资金
+
+                  handle_data=None,  # 策略里的函数: 每天或每分钟执行一次
+                  before_trading_start=None,  # 策略里的函数: 每个交易日之前运行
+                  analyze=None,  # 策略里的函数: 回测结束后运行
+
+                  data_frequency='daily',  # 回测周期, 支持 daily 和 minute
+
+                  bundle='quantopian-quandl',  # 数据包相关: 回测使用的数据包的名字
+                  bundle_timestamp=None,  # 数据包相关
+
+                  trading_calendar=None,  # 回测使用的日历对象
+                  metrics_set='default',  # 计算指标相关
+                  benchmark_returns=None,  # 用作基准
+                  default_extension=True,  # 是否使用默认的 extention
+                  extensions=(),  # extention 文件或模块的地址
+                  strict_extensions=True,  # 若 extention 不存在, 终止程序还是警告
+                  environ=os.environ,  # 加载扩展需要的一些环境变量
+                  blotter='default'):  # 字符串或 Blotter 对象
     """
     Run a trading algorithm.
 
