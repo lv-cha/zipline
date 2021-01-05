@@ -85,6 +85,7 @@ def _run(handle_data,
     This is shared between the cli and :func:`zipline.run_algo`.
     """
 
+    # 加载数据数据包到内存中
     bundle_data = bundles.load(
         bundle,
         environ,
@@ -109,6 +110,7 @@ def _run(handle_data,
         end_date=end,
     )
 
+    # 通过 algotext & algofile 传递策略
     if algotext is not None:
         if local_namespace:
             ip = get_ipython()  # noqa
@@ -293,28 +295,37 @@ def load_extensions(default, extensions, strict, environ, reload=False):
             _loaded_extensions.add(ext)
 
 
-def run_algorithm(start,
-                  end,
-                  initialize,  # 策略的函数: 回测之前运行
-                  capital_base,  # 初始资金
+def run_algorithm(
+        # 回测的时间
+        start,
+        end,
 
-                  handle_data=None,  # 策略里的函数: 每天或每分钟执行一次
-                  before_trading_start=None,  # 策略里的函数: 每个交易日之前运行
-                  analyze=None,  # 策略里的函数: 回测结束后运行
+        capital_base,  # 初始资金
 
-                  data_frequency='daily',  # 回测周期, 支持 daily 和 minute
+        # 策略里定义的函数
+        initialize,  # 回测之前运行
+        handle_data=None,  # 真正策略里执行的逻辑每天或每分钟执行一次
+        before_trading_start=None,  # 每个交易日之前运行
+        analyze=None,  # 回测结束后运行
 
-                  bundle='quantopian-quandl',  # 数据包相关: 回测使用的数据包的名字
-                  bundle_timestamp=None,  # 数据包相关
+        data_frequency='daily',  # 回测周期, 支持 daily 和 minute
 
-                  trading_calendar=None,  # 回测使用的日历对象
-                  metrics_set='default',  # 计算指标相关
-                  benchmark_returns=None,  # 用作基准
-                  default_extension=True,  # 是否使用默认的 extention
-                  extensions=(),  # extention 文件或模块的地址
-                  strict_extensions=True,  # 若 extention 不存在, 终止程序还是警告
-                  environ=os.environ,  # 加载扩展需要的一些环境变量
-                  blotter='default'):  # 字符串或 Blotter 对象
+        # 数据包相关
+        bundle='quantopian-quandl',  # 回测使用的数据包的名字
+        bundle_timestamp=None,
+
+        trading_calendar=None,  # 回测使用的日历对象
+        metrics_set='default',  # 计算指标相关
+        benchmark_returns=None,  # 用作基准
+
+        # extension 相关, 可以自定义一些 python 模块, 或者文件, 一些自定义的方法加载到当前环境中
+        default_extension=True,  # 是否使用默认的 extention
+        extensions=(),  # extention 文件或模块的地址
+        strict_extensions=True,  # 若 extention 不存在, 终止程序还是警告
+
+        environ=os.environ,  # 加载扩展需要的一些环境变量
+        blotter='default'  # 字符串或 Blotter 对象
+):
     """
     Run a trading algorithm.
 
@@ -385,6 +396,8 @@ def run_algorithm(start,
     --------
     zipline.data.bundles.bundles : The available data bundles.
     """
+
+    # 加载 extensions, 类似一些变量, 方法等加载到当前环境中
     load_extensions(default_extension, extensions, strict_extensions, environ)
 
     benchmark_spec = BenchmarkSpec.from_returns(benchmark_returns)
@@ -476,6 +489,7 @@ class BenchmarkSpec(object):
 
     def resolve(self, asset_finder, start_date, end_date):
         """
+        标准化传入的指标为 pd.Series
         Resolve inputs into values to be passed to TradingAlgorithm.
 
         Returns a pair of ``(benchmark_sid, benchmark_returns)`` with at most
